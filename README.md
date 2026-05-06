@@ -1,10 +1,10 @@
-# Docker
+# DockerProject
 
-### Файлы:
+### Список файлов:
 
 * [Статический сайт на веб-сервере Nginx](./Nginx_static.md)
-* [Приложение на Python](./Python.md)
-* [Flask+Python](./Flask+Python_Mini.md)
+* [Простое приложение на Python](./Python.md)
+* [Flask+Python (мини-проект)](./Flask+Python_Mini.md)
 * [Приложение на C# (.NET) с публикацией](./dotNet.md)
 * [Консольное приложение на C++](./cpp.md)
 * [Консольное приложение на C++ и FTXUI](./ftxui.md)
