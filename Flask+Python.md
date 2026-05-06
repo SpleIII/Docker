@@ -46,7 +46,6 @@ Flask==3.0.0
 ```
 ### 3. Содержимое файла Dockerfile:
 
-# Базовый образ – официальный облегчённый Python
 ```dockerfile
 FROM python:3.11-slim
 WORKDIR /app
