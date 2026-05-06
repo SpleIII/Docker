@@ -1,17 +1,10 @@
-##  Dockerfile. Qt 5/C++ приложение
+## Dockerfile. Qt 5/C++ приложение
 
-**Qt** — это кросс‑платформенный фреймворк для разработки программного обеспечения на языке **C++/QML/Python**.
+**Qt** — кросс-платформенный фреймворк для разработки ПО на C++/QML/Python.
 
-> Для выполнения этого задания используйте WSL/Ubuntu, установленную на вашем компьютере с Windows или любой другой десктопный Linux
+> Используйте WSL/Ubuntu или любой десктопный Linux. Не используйте русские имена, пробелы и спецсимволы в названиях файлов и папок!
 
-> Никогда в разработке не используйте русские имена файлов и каталогов!
-
-> Никогда в разработке не используйте пробелы и спец.символы в именах файлов и каталогов!
-
-- Выполнять это задание следует в **WSL** (вызвать **Ubuntu** из **Главного меню**)
-- Если **WSL/Ubuntu** не установлен, установите по инструкции в главном [README.md - WSL 2.0](/README.md)
-- Кроме **WSL/Ubuntu** в ваш **VS Code** надо установить расширение **WSL** по инструкции в главном [README.md - Минимальные настройки `VSCode`](/README.md)
-- После установки расширенимя **WSL** в **VS Code**, вам необходимо закрыть его и открыть **VS Code** в **WSL/Ubuntu** командой `code .`
+> Задание выполняется в WSL. Если WSL/Ubuntu не установлен — установите по инструкции. В VS Code необходимо установить расширение WSL, затем открыть VS Code в WSL командой `code .`
 
 ### 1. Структура проекта
 ```
@@ -22,12 +15,46 @@ qt-docker-app/
 └── run.sh
 ```
 
-В **WSL/Ubuntu** создать одной bash-командой всю структуру для нового приложения:
+Создать структуру одной командой в WSL/Ubuntu:
 ```shell
 mkdir -p qt-docker-app && touch qt-docker-app/Dockerfile qt-docker-app/main.cpp qt-docker-app/CMakeLists.txt qt-docker-app/run.sh && cd qt-docker-app
 ```
 
-### 2. Содержимое файла `Dockerfile`
+### 2. Содержимое файлов
+
+`CMakeLists.txt`:
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(QtDockerApp)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+
+add_executable(app main.cpp)
+target_link_libraries(app Qt5::Widgets)
+```
+
+`main.cpp`:
+```cpp
+#include <QApplication>
+#include <QLabel>
+
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
+    QLabel label("Привет из Docker + Qt!");
+    label.setAlignment(Qt::AlignCenter);
+    label.resize(400, 200);
+    label.show();
+    return app.exec();
+}
+```
+
+`Dockerfile`:
 ```dockerfile
 FROM ubuntu:22.04
 
@@ -64,38 +91,7 @@ RUN mkdir -p build && \
 CMD ["./build/app"]
 ```
 
-### 3. Содержимое файла `CMakeLists.txt`
-```cmake
-cmake_minimum_required(VERSION 3.10)
-project(QtDockerApp)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-
-add_executable(app main.cpp)
-target_link_libraries(app Qt5::Widgets)
-```
-
-### 4. Содержимое файла `main.cpp`
-```cpp
-#include <QApplication>
-#include <QLabel>
-
-int main(int argc, char *argv[])
-{
-    QApplication app(argc, argv);
-    QLabel label("Привет из Docker + Qt!");
-    label.setAlignment(Qt::AlignCenter);
-    label.resize(400, 200);
-    label.show();
-    return app.exec();
-}
-```
-### 5. Содержимое файла `run.sh` для Linux/WSL
+`run.sh` (для Linux/WSL):
 ```bash
 #!/bin/bash
 xhost +local:docker
@@ -106,31 +102,22 @@ docker run --rm -it \
   qt-docker-app
 ```
 
-### 6. Сборка и запуск
+### 3. Сборка и запуск
 
-В командной строке **VS Code+WSL**, находясь в папке `qt-simple`, выполнить:
+Сборка образа (из папки `qt-docker-app` в VS Code+WSL):
 ```shell
 docker build -t qt-docker-app .
 ```
 
-<img width="1226" height="416" alt="изображение" src="https://github.com/user-attachments/assets/721c72ef-c909-4f62-a3b4-a0b6bc3396e2" />
-
-Создание и запуск контейнера для **Linux/WSL (терминал Ubutnu)**
+Запуск для Linux/WSL:
 ```shell
 chmod +x run.sh
 ```
-<img width="538" height="73" alt="изображение" src="https://github.com/user-attachments/assets/02043d1d-5f0b-42a6-85dd-5117748b93f4" />
-
 ```shell
 ./run.sh
 ```
 
-Создание и запуск контейнера для **macOS** (как в обычном Linux?)
-```shell
-
-```
-
-После успешного запуска вы увидите окно приложения. Если окно не появляется, проверьте логи:
+После запуска появится окно приложения. Если окно не появилось — проверьте логи:
 ```shell
 docker logs <container_id>
 ```
