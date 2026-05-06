@@ -1,12 +1,8 @@
-## Dockerfile. Wow - консольное псевдографисеское приложение на C++ и FTXUI
+## Dockerfile. Wow — консольное псевдографическое приложение на C++ и FTXUI
 
-**FTXUI** — это библиотека для создания терминальных интерфейсов
+**FTXUI** — библиотека для создания терминальных интерфейсов.
 
-> Для выполнения этого задания лучше используйте WSL/Ubuntu, установленную на вашем компьютере с Windows или любой другой десктопный Linux
-
-> Никогда в разработке не используйте русские имена файлов и каталогов!
-
-> Никогда в разработке не используйте пробелы и спец.символы в именах файлов и каталогов!
+> Рекомендуется использовать WSL/Ubuntu или любой десктопный Linux. Не используйте русские имена, пробелы и спецсимволы в названиях файлов и папок!
 
 ### 1. Структура проекта
 ```
@@ -16,12 +12,14 @@ ftxui-wow/
 └── CMakeLists.txt
 ```
 
-В каталоге для Docker-проектов создать одной bash-командой всю структуру для нового приложения:
+Создать структуру одной командой:
 ```shell
 mkdir -p ftxui-wow && touch ftxui-wow/Dockerfile ftxui-wow/main.cpp ftxui-wow/CMakeLists.txt && cd ftxui-wow
 ```
 
-### 2. Содержимое файла `main.cpp` (приложения с меню)
+### 2. Содержимое файлов
+
+`main.cpp` (приложение с анимированным прогресс-баром):
 ```cpp
 #include <chrono>
 #include <thread>
@@ -70,7 +68,7 @@ int main() {
 }
 ```
 
-### 3. Содержимое файла `CMakeLists.txt`
+`CMakeLists.txt`:
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project(ftxui_wow)
@@ -86,7 +84,7 @@ add_executable(ftxui_wow main.cpp)
 target_link_libraries(ftxui_wow PRIVATE ftxui::component ftxui::dom ftxui::screen)
 ```
 
-### 4. Содержимое файла Dockerfile
+`Dockerfile` (двухэтапная сборка):
 ```dockerfile
 FROM ubuntu:22.04 AS build
 RUN apt-get update && apt-get install -y \
@@ -107,35 +105,24 @@ COPY --from=build /app/build/ftxui_wow /usr/local/bin/ftxui_wow
 CMD ["ftxui_wow"]
 ```
 
-### 5. Сборка и запуск
+### 3. Сборка и запуск
 
-В командной строке, находясь в папке `ftxui-wow`, выполнить:
+Сборка образа (из папки `ftxui-wow`):
 ```shell
 docker build -t ftxui-wow .
 ```
-> Флаг `-t` задает имя образа
 
-<img width="1015" height="490" alt="изображение" src="https://github.com/user-attachments/assets/7014c1fe-69b1-430c-a688-3735c8e3655e" />
-
-Создание и запуск контейнера
+Запуск контейнера:
 ```shell
 docker run -it --rm ftxui-wow
 ```
 
-<img width="1191" height="174" alt="изображение" src="https://github.com/user-attachments/assets/d3cd3284-8cf1-4dca-9de5-677f2c5b864c" />
-
-### 6. Войти в контейнер для исследования
+Войти в контейнер для исследования:
 ```shell
 docker run -it --entrypoint bash ftxui-wow
 ```
 
-<img width="478" height="68" alt="изображение" src="https://github.com/user-attachments/assets/2c8fa080-c74a-410e-ba8f-8a0573548f33" />
-
-выйти из контейнера:
+Выйти из контейнера:
 ```shell
 exit
 ```
-
-<img width="510" height="71" alt="изображение" src="https://github.com/user-attachments/assets/5b77cd66-d256-4cb5-8eb4-8a4f9147b3d4" />
-
-> Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
