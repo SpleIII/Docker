@@ -1,66 +1,28 @@
 ## Dockerfile. Приложение на TypeScript
 
-**TypeScript** — это надстройка над **JavaScript**, поэтому процесс контейнеризации очень похож на **Node.js**, но с одним важным дополнительным шагом: компиляцией **TypeScript** в **JavaScript** перед запуском
+**TypeScript** — надстройка над JavaScript. Процесс контейнеризации похож на Node.js, но с дополнительным шагом — компиляцией TypeScript в JavaScript перед запуском.
 
-> Никогда в разработке не используйте русские имена файлов и каталогов!
-
-> Никогда в разработке не используйте пробелы и спец.символы в именах файлов и каталогов!
+> Не используйте русские имена, пробелы и спецсимволы в названиях файлов и папок!
 
 ### 1. Структура проекта
 ```
 my-ts-app/
 ├── src/
-│   └── index.ts # исходный код на TypeScript
+│   └── index.ts
 ├── package.json
 ├── tsconfig.json
-└── Dockerfile
+├── Dockerfile
+└── .dockerignore
 ```
 
-В каталоге для Docker-проектов создать одной bash-командой всю структуру для нового приложения:
+Создать структуру одной командой:
 ```shell
 mkdir -p my-ts-app/src && touch my-ts-app/Dockerfile my-ts-app/package.json my-ts-app/tsconfig.json my-ts-app/.dockerignore my-ts-app/src/index.ts && cd my-ts-app
 ```
 
-### 2. Содержимое файла `Dockerfile`
-```dockerfile
-# ---- Этап 1: Сборка и компиляция TypeScript ----
-FROM node:20-alpine AS builder
-WORKDIR /app
-# Копируем файлы с зависимостями
-COPY package*.json tsconfig.json ./
-# Устанавливаем ВСЕ зависимости (включая TypeScript и dev-зависимости)
-# Используем npm install, так как package-lock.json может отсутствовать
-RUN npm install
-# Копируем исходный код
-COPY src ./src
-# Компилируем TypeScript в JavaScript
-RUN npm run build
-# ---- Этап 2: Финальный образ для запуска ----
-FROM node:20-alpine AS runner
-WORKDIR /app
-# Копируем только готовый JavaScript-код и production-зависимости
-# (dev-зависимости, включая TypeScript, уже не нужны)
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
-# Устанавливаем только production-зависимости (без dev)
-RUN npm install --omit=dev
-# Создаём непривилегированного пользователя для безопасности
-USER node
-# Указываем порт (если ваше приложение — веб-сервер)
-EXPOSE 3000
-# Запускаем скомпилированное приложение
-CMD ["node", "dist/index.js"]
-```
+### 2. Содержимое файлов
 
-### 3. Содержимое файла `src/index.ts` (простое приложение)
-```typescript
-const greet = (name: string): void => {
-    console.log(`Hello, ${name}! Welcome to TypeScript in Docker! 🐳`);
-};
-greet('Developer');
-```
-
-### 4. Содержимое файла `package.json` (программные зависимости)
+`package.json`:
 ```json
 {
   "name": "my-ts-app",
@@ -76,7 +38,7 @@ greet('Developer');
 }
 ```
 
-### 5. Содержимое файла `tsconfig.json`
+`tsconfig.json`:
 ```json
 {
   "compilerOptions": {
@@ -95,8 +57,35 @@ greet('Developer');
 }
 ```
 
-### 6. Содержимое файла `.dockerignore` (опционально)
-```dockerignore
+`src/index.ts`:
+```typescript
+const greet = (name: string): void => {
+    console.log(`Hello, ${name}! Welcome to TypeScript in Docker! 🐳`);
+};
+greet('Developer');
+```
+
+`Dockerfile` (двухэтапная сборка: builder компилирует TS, runner запускает готовый JS):
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json tsconfig.json ./
+RUN npm install
+COPY src ./src
+RUN npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+RUN npm install --omit=dev
+USER node
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
+```
+
+`.dockerignore` (опционально):
+```
 node_modules
 dist
 .git
@@ -104,23 +93,14 @@ dist
 *.log
 ```
 
-### 7. Сборка и запуск
+### 3. Сборка и запуск
 
-В командной строке, находясь в папке `my-ts-app`, выполнить:
+Сборка образа (из папки `my-ts-app`):
 ```shell
 docker build -t my-ts-app .
 ```
-> Флаг `-t` задает имя образа
 
-<img width="907" height="480" alt="изображение" src="https://github.com/user-attachments/assets/1eda0ad5-be09-4000-9070-383e29dc5a6b" />
-
-Создание и запуск контейнера:
+Запуск контейнера:
 ```shell
 docker run -it --rm my-ts-app
 ```
-
-<img width="503" height="76" alt="изображение" src="https://github.com/user-attachments/assets/3a700573-6730-46ff-8f39-2edd02e77422" />
-
-> Вы можете увидеть: `Hello, Developer! Welcome to TypeScript in Docker! 🐳`
-
-> Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
