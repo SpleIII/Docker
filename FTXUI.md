@@ -1,12 +1,8 @@
 ## Dockerfile. Консольное приложение на C++ и FTXUI
 
-**FTXUI** — это библиотека для создания терминальных интерфейсов
+**FTXUI** — библиотека для создания терминальных интерфейсов.
 
-> Для выполнения этого задания лучше используйте WSL/Ubuntu, установленную на вашем компьютере с Windows или любой другой десктопный Linux
-
-> Никогда в разработке не используйте русские имена файлов и каталогов!
-
-> Никогда в разработке не используйте пробелы и спец.символы в именах файлов и каталогов!
+> Рекомендуется использовать WSL/Ubuntu или любой десктопный Linux. Не используйте русские имена, пробелы и спецсимволы в названиях файлов и папок!
 
 ### 1. Структура проекта
 ```
@@ -16,14 +12,14 @@ cpp-ftxui/
 └── CMakeLists.txt
 ```
 
-В каталоге для Docker-проектов создать одной bash-командой всю структуру для нового приложения:
+Создать структуру одной командой:
 ```shell
 mkdir -p cpp-ftxui && touch cpp-ftxui/Dockerfile cpp-ftxui/main.cpp cpp-ftxui/CMakeLists.txt && cd cpp-ftxui
 ```
 
+### 2. Содержимое файлов
 
-
-### 2. Содержимое файла `main.cpp` (приложения с меню)
+`main.cpp` (приложение с меню):
 ```cpp
 #include <functional>
 #include <iostream>
@@ -53,23 +49,19 @@ int main() {
 }
 ```
 
-### 3. Содержимое файла `CMakeLists.txt`
+`CMakeLists.txt`:
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project(ftxui_demo)
-# Указываем стандарт C++17 (FTXUI требует C++17)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# Подключаем FetchContent для загрузки FTXUI
 include(FetchContent)
 FetchContent_Declare(ftxui
   GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
-  GIT_TAG v5.0.0  # можно использовать последний тег
+  GIT_TAG v5.0.0
 )
 FetchContent_MakeAvailable(ftxui)
-# Создаём исполняемый файл
 add_executable(ftxui_demo main.cpp)
-# Линкуем библиотеки FTXUI
 target_link_libraries(ftxui_demo PRIVATE
   ftxui::component
   ftxui::dom
@@ -77,66 +69,46 @@ target_link_libraries(ftxui_demo PRIVATE
 )
 ```
 
-### 4. Содержимое файла Dockerfile
+`Dockerfile` (двухэтапная сборка):
 ```dockerfile
-# ---- Этап 1: сборка ----
 FROM ubuntu:22.04 AS build
-# Устанавливаем необходимые пакеты для сборки
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
     && rm -rf /var/lib/apt/lists/*
-# Создаём рабочую директорию
 WORKDIR /app
-# Копируем исходники
 COPY main.cpp CMakeLists.txt ./
-# Собираем проект
 RUN mkdir build && cd build && \
     cmake .. && \
     make
-# ---- Этап 2: финальный образ ----
+
 FROM ubuntu:22.04
-# Устанавливаем только необходимые рантайм-библиотеки
 RUN apt-get update && apt-get install -y \
     libstdc++6 \
     && rm -rf /var/lib/apt/lists/*
-# Копируем собранный бинарник из этапа сборки
 COPY --from=build /app/build/ftxui_demo /usr/local/bin/ftxui_demo
-# Запускаем приложение
 CMD ["ftxui_demo"]
 ```
 
-### 5. Сборка и запуск
+### 3. Сборка и запуск
 
-В командной строке, находясь в папке `cpp-ftxui`, выполнить:
+Сборка образа (из папки `cpp-ftxui`):
 ```shell
 docker build -t ftxui-demo .
 ```
-> Флаг `-t` задает имя образа
 
-<img width="1010" height="527" alt="изображение" src="https://github.com/user-attachments/assets/11f06355-b2de-470e-9fbf-d90b4565de51" />
-
-Создание и запуск контейнера
+Запуск контейнера:
 ```shell
 docker run -it --rm ftxui-demo
 ```
 
-<img width="1080" height="111" alt="изображение" src="https://github.com/user-attachments/assets/33883267-4ced-4148-9a35-b6bec389aa16" />
-
-### 6. Войти в контейнер для исследования
+Войти в контейнер для исследования:
 ```shell
 docker run -it --entrypoint bash ftxui-demo
 ```
 
-<img width="379" height="72" alt="изображение" src="https://github.com/user-attachments/assets/77f0d185-9c12-42f1-b954-198ed9b35e28" />
-
-
-выйти из контейнера:
+Выйти из контейнера:
 ```shell
 exit
 ```
-
-<img width="419" height="107" alt="изображение" src="https://github.com/user-attachments/assets/938e791d-9e4c-4919-9644-74c686506213" />
-
-> Если вы обнаружили ошибку в этом тексте - сообщите пожалуйста автору!
