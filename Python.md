@@ -1,8 +1,8 @@
+Вот краткий и понятный пересказ:
+
 ## Dockerfile. Простое приложение на Python
 
-> Никогда в разработке не используйте русские имена файлов и каталогов!
-
-> Никогда в разработке не используйте пробелы и спец.символы в именах файлов и каталогов!
+> Не используйте русские имена, пробелы и спецсимволы в названиях файлов и папок!
 
 ### 1. Структура проекта
 ```
@@ -11,25 +11,16 @@ my-python-app/
 └── app.py
 ```
 
-В каталоге для Docker-проектов создать одной bash-командой всю структуру для нового приложения:
+Создать структуру одной командой:
 ```shell
 mkdir -p my-python-app && touch my-python-app/Dockerfile my-python-app/app.py && cd my-python-app
 ```
 
-<img width="754" height="65" alt="изображение" src="https://github.com/user-attachments/assets/38307414-d2fa-4760-beec-a84b2f90835c" />
-
-<img width="295" height="69" alt="изображение" src="https://github.com/user-attachments/assets/97f1cd17-cc9b-44a9-8457-6729c6494774" />
-
-
 ### 2. Содержимое файла `Dockerfile`
 ```dockerfile
-# Используем официальный образ Python 3 (slim-версия для меньшего размера)
 FROM python:3-slim
-# Устанавливаем рабочую директорию внутри контейнера
 WORKDIR /app
-# Копируем файл приложения в контейнер
 COPY app.py .
-# Запускаем приложение
 CMD ["python", "app.py"]
 ```
 
@@ -40,17 +31,12 @@ print("Hello from Python in Docker! 🐍")
 
 ### 4. Сборка и запуск
 
-В командной строке, находясь в папке `my-python-app`, выполнить:
+Сборка образа (из папки `my-python-app`):
 ```shell
 docker build -t my-python-app .
 ```
-> Флаг `-t` задает имя образа
 
-<img width="886" height="541" alt="изображение" src="https://github.com/user-attachments/assets/c79455b8-d077-4369-b816-444cbdf923f5" />
-
-Создание и запуск контейнера:
+Запуск контейнера (с автоматическим удалением после завершения):
 ```shell
 docker run --rm my-python-app
 ```
-
-<img width="313" height="51" alt="изображение" src="https://github.com/user-attachments/assets/c5cde1d0-a754-47f3-89a8-be0be2f7029d" />
